@@ -6,7 +6,8 @@ const router = express.Router()
 
 router.get('/', getViolations)
 
-router.post('/log-violation', logViolation)
+router.post('/log', logViolation)
 router.post('/:id/resolve', resolveViolation)
 router.post('/flush', flushViolations)
+
 export default router
