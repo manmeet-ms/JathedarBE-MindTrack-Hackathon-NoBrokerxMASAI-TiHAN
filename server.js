@@ -9,13 +9,11 @@ import { Strategy as DiscordStrategy } from "passport-discord";
 // import "./extractRoutes.js";
 // // import { getExtractedRoutes } from "./extractRoutes.js";
 // import "../src/utils/cron.utils.js";
-import logger from "./utils/logger.utils.js";
-// Import cron jobs
+import logger from "./utils/logger.utils.js"; 
 
 import { connectDB } from "./config/mongodb.js";
 import passport from "./config/passport.js";
 import { authenticateJWT } from "./middlewares/auth.middleware.js";
-// not "passport"
 import User from "./models/User.model.js";
 
 // routes
