@@ -1,11 +1,9 @@
 import axios from "axios";
 import dayjs from "dayjs";
 
-import { applyPointsSrv } from "../../frontend/src/services/points.service.js";
-import logger from "../utils/logger.utils.js";
 import HourlyCheckin from "../models/HourlyCheckin.model.js";
-import PointsTxn from "../models/PointsTxn.model.js";
 import User from "../models/User.model.js";
+import logger from "../utils/logger.utils.js";
 
 export const getUser = async (req, res) => {
   try {

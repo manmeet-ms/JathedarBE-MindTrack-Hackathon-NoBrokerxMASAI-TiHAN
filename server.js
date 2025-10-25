@@ -22,14 +22,15 @@ import User from "./models/User.model.js";
 
 // import authRoutes from "./routes/auth.route.js";
 import analyticsRoutes from "./routes/analytics.route.js";
+import pointsRoutes from "./routes/points.routes.js";
 import authRoutes from "./routes/auth.route.js";
 import externalRoutes from "./routes/external.route.js";
 import notificationsRoutes from "./routes/notification.route.js";
 import philosophyQuotesRoutes from "./routes/philosopherQuote.route.js";
 import punishmentRoutes from "./routes/punishment.route.js";
 import ritualRoutes from "./routes/ritual.route.js";
-import timeblockRoutes from "./routes/timeblock.route.js";
-import timersRoutes from "./routes/timer.route.js";
+import timeblockRoutes from "./routes/timeblock.route.js" 
+import chronosRoutes from "./routes/chronos.route.js";
 import urgesRoutes from "./routes/urge.route.js";
 import userRoutes from "./routes/user.route.js";
 import violationRoutes from "./routes/violation.route.js";
@@ -145,10 +146,11 @@ app.use("/api/violations", authenticateJWT, violationRoutes);
 app.use("/api/punishments", authenticateJWT, punishmentRoutes);
 app.use("/api/analytics", authenticateJWT, analyticsRoutes);
 app.use("/api/notifications", notificationsRoutes);
-app.use("/api/timers", authenticateJWT, timersRoutes);
+app.use("/api/chronos",  chronosRoutes);
 app.use("/api/urges", authenticateJWT, urgesRoutes);
 app.use("/api/philosophy", philosophyQuotesRoutes);
 app.use("/api/external", authenticateJWT, externalRoutes);
+app.use("/api/points",authenticateJWT, pointsRoutes);
 
 // investigation routes
 // app.get("/api/routes", (req, res) => {
