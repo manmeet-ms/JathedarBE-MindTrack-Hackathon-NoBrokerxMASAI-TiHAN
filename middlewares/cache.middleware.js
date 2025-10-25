@@ -1,8 +1,10 @@
 // middlewares/cache.middleware.js
-import logger from ".././utils/logger.utils.js";
+import logger from "../utils/logger.utils.js";
 import { redisClient } from "../config/redis.js";
 
 export const cacheMiddleware = (keyPrefix, ttl = 60) => {
+  // console.log("Cache requested but empty fn() atm... | Check next() if not moving forward")
+ 
   return async (req, res, next) => {
     try {
       const key = `${keyPrefix} : ${req.originalUrl}`; // : is a delimitter so we get a folder like view

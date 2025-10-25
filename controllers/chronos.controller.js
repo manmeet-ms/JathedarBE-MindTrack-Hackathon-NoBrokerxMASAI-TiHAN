@@ -40,8 +40,8 @@ export const resetChronos = async (req, res) => {
 };
 export const createChronos = async (req, res) => {
   try {
-    // logger("log",req.body );
-    // logger("log", req.user.id, req.body);
+    logger("log",req.body );
+    logger("log", req.user.id, req.body);
 const timeExists = await Chronos.exists({codename:req.body.codename, title:req.body.title})
 if (timeExists){
     return res.status(200).json({ message: "Already initialized" });

@@ -6,111 +6,121 @@ import passport from "passport";
 import logger from "../utils/logger.utils.js";
 import User from "../models/User.model.js";
 
-// raw
 export const registerUser = async (req, res) => {
-  /**
-   * ## ALGORITHM:
-   * - get data
-   * - validate data
-   * - check for existing user in database, other creat a new user
-   * - create a verification token, save in db , send to user
-   * - send success status to user
-   */
-  const { name, email, password } = req.body;
-  // logger("log",name, email, password);
-
+  const { username, name, email, password, bio } = req.body;
+  // TODO  cemail check later, encrypt password before push
   if (!name || !email || !password) {
-    log;
     return res.status(400).json({ message: "All fields are required" });
   }
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      logger("log", {
-        message: "User already exists",
-        user: existingUser.name,
-      });
-
-      return res.status(400).json({ message: "User already exists" });
-    }
-    const createdUser = await User.create(req.body);
-    // logger("log", "result result result", createdUser);
-
-    const genToken = crypto.randomBytes(32).toString("hex");
-    logger("log", "verificationToken", genToken);
-    createdUser.verificationToken = genToken;
+    const hashedAvatar = await SparkMD5.hash(username);
+    const createdUser = User.create({ username, name, email, password, bio, avatar: `https://www.gravatar.com/avatar/${hashedAvatar}?d=identicon` });
+    const token = crypto.randomBytes(32).toString("hex");
+    createdUser.verificationToken = token;
     await createdUser.save();
-
-    // send email
-    //   const transport = nodemailer.createTransport({
-    //     host: process.env.VITE_MAILTRAP_HOST,
-    //     port: process.env.VITE_MAILTRAP_PORT,
-    //     auth: {
-    //       user: process.env.VITE_MAILTRAP_USERNAME,
-    //       pass: process.env.VITE_MAILTRAP_PASSWORD,
-    //     },
-    //   });
-    //   const mailtrapOptions = {
-    //     from: process.env.VITE_MAILTRAP_SENDEREMAIL,
-    //     to: user.email,
-    //     subject: "Verify your email",
-    //     text: `Click to verify:
-    // ${process.env.VITE_BACKEND_URL}/api/user/verify/${genToken}`,
-    //   };
-    // await transport.sendMail(mailtrapOptions);
-
     logger("log", {
       text: `Click to verify: 
-  ${process.env.VITE_BACKEND_URL}/user/verify/${genToken}`,
+      ${process.env.VITE_BACKEND_URL}/user/verify/${genToken}`,
     });
-
-    res.status(200).json({
-      message: "User registered successfully, please verify your email",
-      // ,token: genToken,
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "User not registered successfully, please verify your email",
-      error: error,
-    });
+    res.status(200).json(createdUser.name, "registered successfully, verify your email.");
+  } catch (err) {
+    res.status(400).json(err.message);
   }
 };
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    // logger("log", req.body);
+    console.log(email, password);
 
     const user = await User.findOne({ email });
     if (user) {
       logger("log", "User found", user.email, user.name);
+      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, avatar: user.avatar, bio: user.bio, isVerified: user.isVerified }, process.env.JWT_SECRET, { expiresIn: "7d" });
+      // TODO we are giving away user id in jwt is this a posing a security risk
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none", // or "strict"
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.json({ user });
+      res.redirect(process.env.FRONTEND_URL);
     }
 
-    const receivedPasswordHash = bcrypt.compare(password, user.password);
-    // logger("log", receivedPasswordHash);
-
-    if (email === user.email && receivedPasswordHash) {
-      // logger("log", "User Logged in");
-      res.send(user);
+    const isMatch = bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (error) {
-    res.status(401).json(error);
-
     logger("error", error);
+    res.status(401).json(error);
+  }
+}; 
+export const logoutUser = (req, res) => {
+  try {
+    // logger("log", req.cookies);
+    const responseOutcome = res.clearCookie("token", { path: "/", httpOnly: true, secure: true, sameSite: "none" });
+    console.log("Logout Successful");
+    res.status(200).json({message:"Logout successful"});
+    // req.session.destroy();
+    // console.log(token);
+  } catch (err) {
+    res.status(400).json({ error: err, message: "Logout failed" });
   }
 };
 export const verifyUser = async (req, res) => {
   const { token } = req.params;
-  const user = await User.findOne({ verificationToken: token });
-  if (user) {
-    // logger("log", "User found", user.name);
+  const userRes = await User.findOne({ verificationToken: token });
+  if (userRes) {
+    userRes.isVerified = true;
 
-    user.isVerified = true;
-    user.verificationToken = undefined;
-    await user.save();
-    res.status(200).json({ message: `${user.name} you're now verified!` });
+    userRes.verificationToken = undefined;
+    await userRes.save();
+    res.status(200).json({ message: `${userRes.name} verified!` });
   }
 };
-export const resetPassword = async (req, res) => {};
+export const resetPasswordUser = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log(email);
+
+    const userExist = await User.findOne({ email: email });
+    if (userExist) {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      userExist.resetPasswordToken = resetToken;
+      // TODO add reset passwork mailer link and make aveifier funtin to do the sasme verification
+      userExist.resetPasswordTokenExpires = dayjs().add(10, "m");
+      await userExist.save();
+
+      res.status(200).json("");
+    } else {
+      res.status(400).json("User does not exists!");
+    }
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+};
+export const resetPasswordTokenVerify = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log(email);
+
+    const userExist = await User.findOne({ email: email });
+    if (userExist) {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      userExist.resetPasswordToken = resetToken;
+      userExist.resetPasswordTokenExpires = dayjs().add(10, "m");
+      await userExist.save();
+
+      res.status(200).json("");
+    } else {
+      res.status(400).json("User does not exists!");
+    }
+  } catch (err) {
+    res.status(400).json(err.message);
+  }
+};
+
 export const flushUsers = async (req, res) => {
   await User.deleteMany({});
   res.status(200).json({ message: "All users flushed successfully" });

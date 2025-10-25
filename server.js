@@ -36,7 +36,7 @@ import violationRoutes from "./routes/violation.route.js";
 
 const app = express();
 
-const port = process.env.SERVER_PORT || 3000;
+const port = process.env.SERVER_PORT || 4000;
 // app.use(
 //   treblle({
 //     apiKey: process.env.TREBLLE_API_KEY,
@@ -69,8 +69,8 @@ connectDB();
 passport.use(
   new DiscordStrategy(
     {
-      clientID: process.env.VITE_DISCORD_JATHEDAR_CLIENT_ID,
-      clientSecret: process.env.VITE_DISCORD_JATHEDAR_CLIENT_SECRET,
+      clientID: process.env.DISCORD_JATHEDAR_CLIENT_ID,
+      clientSecret: process.env.DISCORD_JATHEDAR_CLIENT_SECRET,
       callbackURL: `${process.env.VITE_BACKEND_URL}/auth/discord/callback`,
       scope: ["identify", "email"],
     },

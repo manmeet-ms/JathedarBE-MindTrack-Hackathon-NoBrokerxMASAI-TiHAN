@@ -3,8 +3,8 @@ import dayjs from "dayjs";
 import logger from "../utils/logger.utils.js";
 import Chronos from "../models/Chronos.model.js";
 import mongoose from "mongoose";
-
-const MONGO_URI = "mongodb://127.0.0.1:27017/jathedar"; // change to your db
+import  "dotenv/config";
+const MONGO_URI = process.env.MONGO_URI; // change to your db
 async function seedChronos() {
   try {
     await mongoose.connect(MONGO_URI);

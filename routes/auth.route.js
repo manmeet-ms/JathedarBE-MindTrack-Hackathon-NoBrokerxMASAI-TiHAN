@@ -8,7 +8,7 @@ import {
   flushUsers,
   loginUser,
   registerUser,
-  resetPassword,
+  resetPasswordUser,
   verifyUser,
 } from "../controllers/auth.controller.js";
 import {
@@ -26,7 +26,7 @@ router.post(
   registerUser
 );
 router.post("/login", checkUserExists, requireAuthentication, loginUser);
-router.post("/password/reset", resetPassword);
+router.post("/password/reset", resetPasswordUser);
 router.get("/verify/:token", verifyUser);
 router.post("/flush", flushUsers);
 
