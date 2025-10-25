@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "redis": " docker run -p 6379:6379 -d redis:latest ",
-    "server": "nodemon server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "devDependencies": {
     "@types/bun": "latest",

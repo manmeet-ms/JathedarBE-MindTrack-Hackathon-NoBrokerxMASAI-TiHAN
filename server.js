@@ -36,7 +36,7 @@ import violationRoutes from "./routes/violation.route.js";
 
 const app = express();
 
-const port = process.env.SERVER_PORT || 4000;
+const port =process.env.PORT || process.env.SERVER_PORT || 4000;
 // app.use(
 //   treblle({
 //     apiKey: process.env.TREBLLE_API_KEY,
@@ -134,7 +134,7 @@ app.get("/", (req, res) => res.send({ message: "Welcome to Jathedar" }));
 
 app.get("/api", (req, res) => res.send({ message: "This is /api" }));
 
-app.listen(port, () => logger("info", `Server running on ${port}`));
+app.listen(port,"0.0.0.0", () => logger("info", `Server running on ${port}`));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", authenticateJWT, userRoutes);
