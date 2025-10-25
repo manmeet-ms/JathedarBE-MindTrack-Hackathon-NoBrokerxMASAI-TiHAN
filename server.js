@@ -46,7 +46,7 @@ const port =process.env.PORT || process.env.SERVER_PORT || 4000;
 app.use(
   // TODO: fix this cors to allow from certain backednad fe routes
   cors({
-    origin: ['http://localhost:5173', 'https://jathedar-fe-mindtrack-hackathon.vercel.app/'],
+    origin: true,
     credentials: true,
     // allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -129,12 +129,14 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
+app.listen(port,"0.0.0.0", () => logger("info", `Server running on ${port}`));
 // Add routes here
 app.get("/", (req, res) => res.send({ message: "Welcome to Jathedar" }));
 
 app.get("/api", (req, res) => res.send({ message: "This is /api" }));
-
-app.listen(port,"0.0.0.0", () => logger("info", `Server running on ${port}`));
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', time: new Date().toISOString() });
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", authenticateJWT, userRoutes);
