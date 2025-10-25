@@ -6,8 +6,7 @@ import mongoose from "mongoose";
 import "dotenv/config";
 import User from "../models/User.model.js"
 
-const MONGO_URI = "mongodb://127.0.0.1:27017/jathedar"; // change to your db
-
+ 
 async function seedUsers() {
   try {
     await mongoose.connect(process.env.MONGO_URI);

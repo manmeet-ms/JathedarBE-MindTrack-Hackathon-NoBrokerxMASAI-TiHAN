@@ -9,7 +9,7 @@ export const getUser = async (req, res) => {
   try {
     const { userId } = req.params;
     const userRes = await User.findById(userId);
-    // logger("success", "User found", userRes.name);
+    logger("success", "User found", userRes.name);
 
     res.status(200).json(userRes);
   } catch (error) {

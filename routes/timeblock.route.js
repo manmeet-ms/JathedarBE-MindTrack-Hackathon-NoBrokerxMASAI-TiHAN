@@ -12,7 +12,6 @@ const router = express.Router();
 router.post("/", createTimeBlock);
 router.get(
   "/today",
-  // cacheMiddleware("getTodayTimeblocks", 43200),
   getTodayBlocks
 );
 router.post("/:id/complete", completeBlock);

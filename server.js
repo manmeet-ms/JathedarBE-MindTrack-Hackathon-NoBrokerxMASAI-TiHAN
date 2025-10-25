@@ -46,7 +46,7 @@ const port =process.env.PORT || process.env.SERVER_PORT || 4000;
 app.use(
   // TODO: fix this cors to allow from certain backednad fe routes
   cors({
-    origin: true,
+    origin: ['http://localhost:5173', 'https://jathedar-fe-mindtrack-hackathon.vercel.app/'],
     credentials: true,
     // allowedHeaders: ["Content-Type", "Authorization"],
   })
