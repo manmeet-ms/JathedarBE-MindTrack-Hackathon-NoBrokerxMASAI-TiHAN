@@ -4,7 +4,88 @@ import Ritual from "../models/Ritual.model.js";
 import TimeBlock from "../models/Timeblock.model.js";
 import User from "../models/User.model.js";
 import Violation from "../models/Violation.model.js";
+import PointsTxn from "../models/PointsTxn.model.js";
+import logger from "../utils/logger.utils.js";
+import Urge from "../models/Urge.model.js";
 
+
+ 
+
+
+export const getStreaks = async (req, res) => {
+  try {
+    // Fetch transactions sorted by time
+    const entries = await PointsTxn.find({ type: "TIMER_RESET_PENALTY" })
+      .select("_id uid user timerId createdAt") // ensure timerId exists in your model
+      .sort("createdAt");
+
+    // Group by timerId (unique timer)
+    const grouped = entries.reduce((acc, entry) => {
+      const timerId = entry.timerId?.toString() || "unknown_timer";
+      if (!acc[timerId]) acc[timerId] = [];
+      acc[timerId].push(entry);
+      return acc;
+    }, {});
+
+    // Build chart-ready structure for each timer
+    const chartData = Object.entries(grouped).map(([timerId, records]) => {
+      // sort by timestamp
+      records.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      const dataPoints = [];
+      for (let i = 1; i < records.length; i++) {
+        const prev = new Date(records[i - 1].createdAt);
+        const curr = new Date(records[i].createdAt);
+
+        // Calculate time difference in hours between consecutive resets
+        const diffHrs = (curr - prev) / (1000 * 60 * 60);
+
+        dataPoints.push({
+          x: curr.getTime(),
+          y: diffHrs,
+        });
+      }
+
+      return {
+        id: timerId,
+        label: `Timer ${timerId.slice(-6)}`,
+        user: records[0]?.user || "Unknown",
+        data: dataPoints,
+      };
+    });
+
+    // Sort timers by their first timestamp
+    chartData.sort((a, b) => (a.data[0]?.x || 0) - (b.data[0]?.x || 0));
+
+    res.json(chartData);
+  } catch (err) {
+    console.error("getStreaks error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+export const getMood = async (req, res) => {
+  try {
+    // Fetch all urge entries sorted chronologically
+    const entries = await Urge.find()
+      .select("_id urgeTimeStamp urgeIntensity urgeTrigger")
+      .sort("urgeTimeStamp");
+
+    // Transform entries into x-y pairs for charting
+    const formatted = entries.map((entry) => ({
+      id: entry._id.toString(),
+      x: new Date(entry.urgeTimeStamp).getTime(), // timestamp for X-axis
+      y: entry.urgeIntensity, // intensity for Y-axis
+      tooltip: entry.urgeTrigger, // for hover details
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("getMood error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 export const leaderboardUsers = async (req, res) => {
   try {
     const users = await User.find().sort({ points: -1 }).limit(20);
