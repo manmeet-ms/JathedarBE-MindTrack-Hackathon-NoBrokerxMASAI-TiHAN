@@ -20,13 +20,13 @@ async function seedChronos() {
         title: faker.lorem.words(4), // random 3-word lorem
         description: faker.lorem.sentences(6), // random lorem text
         perks: Array.from({ length: faker.number.int({ min: 6, max: 15 }) }, () =>
-          ({ name: faker.word.noun(), description: faker.lorem.lines(2) })
+          ({ name: "Perks", description: faker.lorem.lines(2) })
         ),
         punishments: Array.from({ length: faker.number.int({ min: 4, max: 5 }) }, () =>
-          ({ name: faker.word.noun(), description: faker.lorem.lines(2) })
+          ({ name: "Punishments", description: faker.lorem.lines(2) })
         ),
         alternates: Array.from({ length: faker.number.int({ min: 1, max: 13 }) }, () =>
-          ({ name: faker.word.noun(), description: faker.lorem.lines(2) })
+          ({ name: "Alternates", description: faker.lorem.lines(2) })
         ),
         quoteFlashingAllowed: faker.datatype.boolean(),
         pulseTheme: "bg-green-500",

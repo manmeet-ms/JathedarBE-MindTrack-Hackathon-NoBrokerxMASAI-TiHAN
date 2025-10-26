@@ -7,7 +7,7 @@ import Violation from "../models/Violation.model.js";
 import PointsTxn from "../models/PointsTxn.model.js";
 import logger from "../utils/logger.utils.js";
 import Urge from "../models/Urge.model.js";
-
+ 
 
  
 
@@ -64,7 +64,42 @@ export const getStreaks = async (req, res) => {
   }
 };
 
+export const getCalendarActivity = async (req, res) => {
+  try {
+    const entries = await PointsTxn.find()
+      .sort({ createdAt: -1 })
+      .select("_id createdAt type");
 
+    // Map database entries to calendar-compatible objects
+    const eventMap = {
+      TIMER_RESET_PENALTY: { title: "Timer Reset Penalty", color: "pink" },
+      TIMEBLOCK_COMPLETE_CREDIT: { title: "Timeblock Completed", color: "green" },
+      RITUAL_CREATED_CREDIT: { title: "Ritual Created", color: "purple" },
+      URGE_LOGGED_CREDIT: { title: "Urge Logged", color: "blue" },
+      VIOLATION_RESOLVED_CREDIT: { title: "Violation Resolved", color: "blue" },
+      DIARY_WRITING_CREDIT: { title: "Diary Entry", color: "green" },
+    };
+
+    const events = entries.map((entry) => {
+      const eventData = eventMap[entry.type] || { title: entry.type, color: "default" };
+
+      return {
+        id: entry._id.toString(),
+        start: new Date(entry.createdAt),
+        end: new Date(new Date(entry.createdAt).getTime() + 30 * 60 * 1000), // +30 min duration
+        title: eventData.title,
+        color: eventData.color,
+      };
+    });
+
+    res.status(200).json(events);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+
+ 
 export const getMood = async (req, res) => {
   try {
     // Fetch all urge entries sorted chronologically
